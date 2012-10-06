@@ -56,36 +56,9 @@ static bool global_responder(Message *message, Entity *entity)
 
 static bool render_responder(Message *message, Entity *entity)
 {
-    RenderEntity *re = static_cast<RenderEntity*>(entity);
-
-    if(message->type == Hash::hashString(Engine::UIEVENT_MESSAGE))
+    if(message->type == Hash::hashString("render"))
     {
-        auto p = std::static_pointer_cast<SDLEventPayload>(message->payload);
-        
-        if(p->event.type == SDL_QUIT ||
-           (p->event.type == SDL_KEYDOWN && p->event.key.keysym.sym == SDLK_ESCAPE))
-            game->engine.quit();
-        if(p->event.type == SDL_KEYDOWN)
-            switch(p->event.key.keysym.sym)
-            {
-            case SDLK_KP6:
-                re->worldX += 9*2;
-                break;
-            case SDLK_KP4:
-                re->worldX -= 9*2;
-                break;
-            case SDLK_KP8:
-                re->worldY -= 16*2;
-                break;
-            case SDLK_KP2:
-                re->worldY += 16*2;
-                break;
-            default:
-                break;
-            }
-    }
-    else if(message->type == Hash::hashString("render"))
-    {
+        RenderEntity *re = static_cast<RenderEntity*>(entity);
         auto sdlDriver = game->engine.getSDLDriver();
         GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(re->imageName));
         sdlDriver->drawImage(texture, re->worldX, re->worldY, 9, 16, 0, 0, 1);
