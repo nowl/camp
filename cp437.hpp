@@ -1,8 +1,6 @@
 #ifndef __CP437_HPP__
 #define __CP437_HPP__
 
-class ImageLoader;
-
-void load_cp437(ImageLoader *im);
+void load_cp437();
 
 #endif  // __CP437_HPP__
