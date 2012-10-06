@@ -3,7 +3,7 @@
 
 #include "game_components.hpp"
 
-class Player {
+class Player : public Entity {
 public:
     RenderEntity renderEntity;
 };

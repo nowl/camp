@@ -41,7 +41,7 @@ void processMessage(Message *message)
 }
 */
 
-bool global_responder(Message *message, Entity *entity)
+static bool global_responder(Message *message, Entity *entity)
 {
     if(message->type == Hash::hashString(Engine::RENDER_MESSAGE))
     {
@@ -54,7 +54,7 @@ bool global_responder(Message *message, Entity *entity)
     return true;
 }
 
-bool render_responder(Message *message, Entity *entity)
+static bool render_responder(Message *message, Entity *entity)
 {
     RenderEntity *re = static_cast<RenderEntity*>(entity);
 
@@ -88,10 +88,44 @@ bool render_responder(Message *message, Entity *entity)
     {
         auto sdlDriver = game->engine.getSDLDriver();
         GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(re->imageName));
-        sdlDriver->drawImage(texture, re->worldX, re->worldY, 9*2, 16*2, 0, 0, 1);
+        sdlDriver->drawImage(texture, re->worldX, re->worldY, 9, 16, 0, 0, 1);
     }
 
     return false;
+}
+
+static bool player_uievents(Message *message, Entity *entity)
+{
+    Player *player = static_cast<Player*>(entity);
+
+    if(message->type == Hash::hashString(Engine::UIEVENT_MESSAGE))
+    {
+        auto p = std::static_pointer_cast<SDLEventPayload>(message->payload);
+        
+        if(p->event.type == SDL_QUIT ||
+           (p->event.type == SDL_KEYDOWN && p->event.key.keysym.sym == SDLK_ESCAPE))
+            game->engine.quit();
+        if(p->event.type == SDL_KEYDOWN)
+            switch(p->event.key.keysym.sym)
+            {
+            case SDLK_KP6:
+                player->renderEntity.worldX += 9;
+                break;
+            case SDLK_KP4:
+                player->renderEntity.worldX -= 9;
+                break;
+            case SDLK_KP8:
+                player->renderEntity.worldY -= 16;
+                break;
+            case SDLK_KP2:
+                player->renderEntity.worldY += 16;
+                break;
+            default:
+                break;
+            }
+    }
+
+    return true;
 }
 
 int main(int argc, char *argv[])
@@ -119,25 +153,26 @@ int main(int argc, char *argv[])
     systemRenderComp.addEntity(&systemEntity);
 
     Component renderComp(render_responder);
-    renderComp.addResponderType(Engine::UIEVENT_MESSAGE);
+    //renderComp.addResponderType(Engine::UIEVENT_MESSAGE);
     //comp1.addResponderType(Engine::UPDATE_MESSAGE);
     //renderComp.addResponderType(Engine::RENDER_MESSAGE);
     renderComp.addResponderType("render");
 
-    //Component updateComp(player_update);
+    Component playerUpdateComp(player_uievents);
+    playerUpdateComp.addResponderType(Engine::UIEVENT_MESSAGE);
 
     Player player;
-    player.renderEntity.worldX = 50;
-    player.renderEntity.worldY = 50;
+    player.renderEntity.worldX = 9*5;
+    player.renderEntity.worldY = 16*5;
     player.renderEntity.imageName = "player";
     renderComp.addEntity(&player.renderEntity);
-    //updateComp.addEntity(&player.
+    playerUpdateComp.addEntity(&player);
 
     Walls walls;
-    walls.renderEntities.push_back(RenderEntity(50+9, 50, "solid"));
-    walls.renderEntities.push_back(RenderEntity(50+9*2, 50, "solid"));
-    walls.renderEntities.push_back(RenderEntity(50+9*4, 50, "solid"));
-    walls.renderEntities.push_back(RenderEntity(50+9*7, 50+16*2, "water"));
+    walls.renderEntities.push_back(RenderEntity(9, 0, "solid"));
+    walls.renderEntities.push_back(RenderEntity(9*2, 0, "solid"));
+    walls.renderEntities.push_back(RenderEntity(9*4, 0, "solid"));
+    walls.renderEntities.push_back(RenderEntity(9*7, 16*2, "water"));
 
     auto iter = walls.renderEntities.begin();
     for(; iter!=walls.renderEntities.end(); ++iter)
