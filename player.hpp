@@ -6,6 +6,7 @@
 class Player {
 public:
     Renderable renderable;
+    bool canMove;
 };
 
 #endif  // __PLAYER_HPP__
