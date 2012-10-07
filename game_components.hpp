@@ -9,12 +9,13 @@ class Renderable {
 public:    
     float worldX, worldY;
     std::string imageName;
+    std::string color;
 
     Renderable() {}
-    Renderable(float x, float y, std::string name)
-        : worldX(x), worldY(y), imageName(name)
+    Renderable(float x, float y, std::string name, std::string color)
+        : worldX(x), worldY(y), imageName(name), color(color)
     {}
-    virtual ~Renderable() {};    
+    virtual ~Renderable() {};
 };
 
 struct MovementPayload : public Message::IPayload {

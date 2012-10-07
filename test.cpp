@@ -52,7 +52,15 @@ public:
         {
             auto sdlDriver = game->engine.getSDLDriver();
             GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
-            sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY, 9, 16, 0, 0, 1);
+            if(_renderable->color == "white")
+                sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                     9, 16, 1, 1, 1);
+            else if(_renderable->color == "blue")
+                sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                     9, 16, 0, 0, 1);
+            else if(_renderable->color == "red")
+                sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                     9, 16, 1, 0, 0);
         }
 
         return false;
@@ -161,6 +169,7 @@ int main(int argc, char *argv[])
     player.renderable.worldX = 9*5;
     player.renderable.worldY = 16*5;
     player.renderable.imageName = "player";
+    player.renderable.color = "white";
 
     RenderComponent playerRenderComponent(&player.renderable);
 
@@ -170,9 +179,23 @@ int main(int argc, char *argv[])
     Walls walls;
     
     for(int i=0; i<Random::intMinMax(1000, 2000); i++)
+    {
+        std::string wallType, color;
+        if(Random::intMinMax(0,1) == 0)
+        {
+            wallType = "solid";
+            color = "red";
+        }
+        else
+        {
+            wallType = "water";
+            color = "blue";
+        }
         walls.renderEntities.push_back(Renderable(9*Random::intMinMax(0,70),
                                                   16*Random::intMinMax(0,40),
-                                                  "solid"));
+                                                  wallType,
+                                                  color));
+    }
 
     auto iter = walls.renderEntities.begin();
     for(; iter!=walls.renderEntities.end(); ++iter)
