@@ -7,6 +7,7 @@
 #include "component.hpp"
 #include "log.hpp"
 #include "hash.hpp"
+#include "random.hpp"
 
 #include "cp437.hpp"
 #include "game.hpp"
@@ -41,65 +42,94 @@ void processMessage(Message *message)
 }
 */
 
-static bool global_responder(Message *message, Entity *entity)
-{
-    if(message->type == Hash::hashString(Engine::RENDER_MESSAGE))
+class GlobalRenderComponent : public Component {
+public:
+    GlobalRenderComponent()
     {
-        auto sdlDriver = game->engine.getSDLDriver();
-        sdlDriver->preRender();
-        Message::send(NULL, "render", *message->payload.get(), Message::ASYNC);
-        sdlDriver->postRender();
+        addResponderType(Engine::RENDER_MESSAGE);
     }
 
-    return true;
-}
-
-static bool render_responder(Message *message, Entity *entity)
-{
-    if(message->type == Hash::hashString("render"))
+    virtual bool respond(Message *message)
     {
-        RenderEntity *re = static_cast<RenderEntity*>(entity);
-        auto sdlDriver = game->engine.getSDLDriver();
-        GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(re->imageName));
-        sdlDriver->drawImage(texture, re->worldX, re->worldY, 9, 16, 0, 0, 1);
-    }
-
-    return false;
-}
-
-static bool player_uievents(Message *message, Entity *entity)
-{
-    Player *player = static_cast<Player*>(entity);
-
-    if(message->type == Hash::hashString(Engine::UIEVENT_MESSAGE))
-    {
-        auto p = std::static_pointer_cast<SDLEventPayload>(message->payload);
+        if(message->type == Hash::hashString(Engine::RENDER_MESSAGE))
+        {
+            auto sdlDriver = game->engine.getSDLDriver();
+            sdlDriver->preRender();
+            Message::send(NULL, "render", *message->payload.get(), Message::ASYNC);
+            sdlDriver->postRender();
+        }
         
-        if(p->event.type == SDL_QUIT ||
-           (p->event.type == SDL_KEYDOWN && p->event.key.keysym.sym == SDLK_ESCAPE))
-            game->engine.quit();
-        if(p->event.type == SDL_KEYDOWN)
-            switch(p->event.key.keysym.sym)
-            {
-            case SDLK_KP6:
-                player->renderEntity.worldX += 9;
-                break;
-            case SDLK_KP4:
-                player->renderEntity.worldX -= 9;
-                break;
-            case SDLK_KP8:
-                player->renderEntity.worldY -= 16;
-                break;
-            case SDLK_KP2:
-                player->renderEntity.worldY += 16;
-                break;
-            default:
-                break;
-            }
+        return true;
+    }
+};
+
+class RenderComponent : public Component {
+public:
+    RenderComponent(Renderable *renderable)
+        :_renderable(renderable)
+    {
+        addResponderType("render");
     }
 
-    return true;
-}
+    virtual bool respond(Message *message)
+    {
+        if(message->type == Hash::hashString("render"))
+        {
+            auto sdlDriver = game->engine.getSDLDriver();
+            GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
+            sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY, 9, 16, 0, 0, 1);
+        }
+
+        return false;
+    }
+    
+private:
+    Renderable *_renderable;
+};
+
+class PlayerUIEventsComponent : public Component {
+public:
+    PlayerUIEventsComponent(Player *player) 
+        : _player(player)
+    {
+        addResponderType(Engine::UIEVENT_MESSAGE);
+    }
+
+    virtual bool respond(Message *message)
+    {
+        if(message->type == Hash::hashString(Engine::UIEVENT_MESSAGE))
+        {
+            auto p = std::static_pointer_cast<SDLEventPayload>(message->payload);
+            
+            if(p->event.type == SDL_QUIT ||
+               (p->event.type == SDL_KEYDOWN && p->event.key.keysym.sym == SDLK_ESCAPE))
+                game->engine.quit();
+            if(p->event.type == SDL_KEYDOWN)
+                switch(p->event.key.keysym.sym)
+                {
+                case SDLK_KP6:
+                    _player->renderable.worldX += 9;
+                    break;
+                case SDLK_KP4:
+                    _player->renderable.worldX -= 9;
+                    break;
+                case SDLK_KP8:
+                    _player->renderable.worldY -= 16;
+                    break;
+                case SDLK_KP2:
+                    _player->renderable.worldY += 16;
+                    break;
+                default:
+                    break;
+                }
+        }
+
+        return true;
+    }
+
+private:
+    Player *_player;
+};
 
 int main(int argc, char *argv[])
 {
@@ -119,37 +149,30 @@ int main(int argc, char *argv[])
     game->imageNameCache.cache("water", "f7");
     game->imageNameCache.cache("solid", "db");
     
-    Component systemRenderComp(global_responder);
-    systemRenderComp.addResponderType(Engine::RENDER_MESSAGE);
-
-    Entity systemEntity;
-    systemRenderComp.addEntity(&systemEntity);
-
-    Component renderComp(render_responder);
-    //renderComp.addResponderType(Engine::UIEVENT_MESSAGE);
-    //comp1.addResponderType(Engine::UPDATE_MESSAGE);
-    //renderComp.addResponderType(Engine::RENDER_MESSAGE);
-    renderComp.addResponderType("render");
-
-    Component playerUpdateComp(player_uievents);
-    playerUpdateComp.addResponderType(Engine::UIEVENT_MESSAGE);
+    GlobalRenderComponent systemRenderComp;
 
     Player player;
-    player.renderEntity.worldX = 9*5;
-    player.renderEntity.worldY = 16*5;
-    player.renderEntity.imageName = "player";
-    renderComp.addEntity(&player.renderEntity);
-    playerUpdateComp.addEntity(&player);
+    player.renderable.worldX = 9*5;
+    player.renderable.worldY = 16*5;
+    player.renderable.imageName = "player";
+
+    RenderComponent playerRenderComponent(&player.renderable);
+
+    PlayerUIEventsComponent playerUIEventsComponent(&player);
+
 
     Walls walls;
-    walls.renderEntities.push_back(RenderEntity(9, 0, "solid"));
-    walls.renderEntities.push_back(RenderEntity(9*2, 0, "solid"));
-    walls.renderEntities.push_back(RenderEntity(9*4, 0, "solid"));
-    walls.renderEntities.push_back(RenderEntity(9*7, 16*2, "water"));
+    
+    for(int i=0; i<Random::intMinMax(100, 1000); i++)
+        walls.renderEntities.push_back(Renderable(9*Random::intMinMax(0,70),
+                                                  16*Random::intMinMax(0,40),
+                                                  "solid"));
 
     auto iter = walls.renderEntities.begin();
     for(; iter!=walls.renderEntities.end(); ++iter)
-        renderComp.addEntity(&*iter);
+    {
+        walls.renderComponents.push_back(std::unique_ptr<RenderComponent>(new RenderComponent(&*iter)));
+    }
 
     game->engine.run();
 

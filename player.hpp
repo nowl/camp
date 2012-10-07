@@ -3,9 +3,9 @@
 
 #include "game_components.hpp"
 
-class Player : public Entity {
+class Player {
 public:
-    RenderEntity renderEntity;
+    Renderable renderable;
 };
 
 #endif  // __PLAYER_HPP__

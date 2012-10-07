@@ -3,18 +3,16 @@
 
 #include <string>
 
-#include "entity.hpp"
-
-class RenderEntity : public Entity {
+class Renderable {
 public:    
     float worldX, worldY;
     std::string imageName;
 
-    RenderEntity() {}
-    RenderEntity(float x, float y, std::string name)
+    Renderable() {}
+    Renderable(float x, float y, std::string name)
         : worldX(x), worldY(y), imageName(name)
     {}
-    virtual ~RenderEntity() {};    
+    virtual ~Renderable() {};    
 };
 
 #endif  // __GAME_COMPONENTS_HPP__
