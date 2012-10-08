@@ -17,6 +17,8 @@
 
 static Game *game = Game::Instance();
 
+static const int NumRenderLevels = 3;
+
 class GlobalRenderComponent : public Component {
 public:
     GlobalRenderComponent()
@@ -30,7 +32,8 @@ public:
         {
             auto sdlDriver = game->engine.getSDLDriver();
             sdlDriver->preRender();
-            Message::send("render", *message->payload.get(), Message::ASYNC);
+            for(int i=0; i<NumRenderLevels; i++)
+                Message::send("render", RenderPayload(i), Message::ASYNC);
             sdlDriver->postRender();
         }
         
@@ -50,17 +53,21 @@ public:
     {
         if(message->type == Hash::hashString("render"))
         {
-            auto sdlDriver = game->engine.getSDLDriver();
-            GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
-            if(_renderable->color == "white")
-                sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                     9, 16, 1, 1, 1);
-            else if(_renderable->color == "blue")
-                sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                     9, 16, 0, 0, 1);
-            else if(_renderable->color == "red")
-                sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                     9, 16, 1, 0, 0);
+            auto payload = std::static_pointer_cast<RenderPayload>(message->payload);
+            if(payload->level == _renderable->renderLevel)
+            {
+                auto sdlDriver = game->engine.getSDLDriver();
+                GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
+                if(_renderable->color == "white")
+                    sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                         9, 16, 1, 1, 1);
+                else if(_renderable->color == "blue")
+                    sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                         9, 16, 0, 0, 1);
+                else if(_renderable->color == "red")
+                    sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                         9, 16, 1, 0, 0);
+            }
         }
 
         return false;
@@ -68,6 +75,45 @@ public:
     
 private:
     Renderable *_renderable;
+};
+
+class BoxOutlineRenderComponent : public Component {
+public:
+    BoxOutlineRenderComponent(BoxRenderable *renderable)
+        :_renderable(renderable)
+    {
+        addResponderType("render");
+    }
+
+    virtual bool respond(Message *message)
+    {
+        if(message->type == Hash::hashString("render"))
+        {
+            auto payload = std::static_pointer_cast<RenderPayload>(message->payload);
+            if(payload->level == _renderable->renderLevel)
+            {
+                auto sdlDriver = game->engine.getSDLDriver();
+                
+                float r,g,b;
+                if(_renderable->color == "white")
+                { r=1; g=1; b=1; }
+                
+                auto x = _renderable->worldX;
+                auto y = _renderable->worldY;
+                auto w = _renderable->w;
+                auto h = _renderable->h;
+                auto lw = _renderable->lineWidth;
+                sdlDriver->drawLine(x-1, y-1, x+w+1, y-1, lw, r, g, b);
+                sdlDriver->drawLine(x-1, y-1, x-1, y+h+1, lw, r, g, b);
+                sdlDriver->drawLine(x-1, y+h+1, x+w+1, y+h+1, lw, r, g, b);
+                sdlDriver->drawLine(x+w+1, y-1, x+w+1, y+h+1, lw, r, g, b);
+            }
+        }
+        return false;
+    }
+    
+private:
+    BoxRenderable *_renderable;
 };
 
 class PlayerUIEventsComponent : public Component {
@@ -88,7 +134,8 @@ public:
             if(p->event.type == SDL_QUIT ||
                (p->event.type == SDL_KEYDOWN && p->event.key.keysym.sym == SDLK_ESCAPE))
                 game->engine.quit();
-            if(p->event.type == SDL_KEYDOWN)
+            else if(p->event.type == SDL_KEYDOWN)
+            {
                 switch(p->event.key.keysym.sym)
                 {
                 case SDLK_KP6:
@@ -138,6 +185,15 @@ public:
                 default:
                     break;
                 }
+            }
+            else if(p->event.type == SDL_MOUSEMOTION)
+            {
+                // determine where mouse is
+                auto mouseX = p->event.motion.x;
+                auto mouseY = p->event.motion.y;
+                _player->boxRenderable.worldX = mouseX/9*9;
+                _player->boxRenderable.worldY = mouseY/16*16;
+            }
         }
         else if(message->type == Hash::hashString("collision"))
         {
@@ -169,9 +225,18 @@ int main(int argc, char *argv[])
     player.renderable.worldX = 9*5;
     player.renderable.worldY = 16*5;
     player.renderable.imageName = "player";
+    player.renderable.renderLevel = 1;
     player.renderable.color = "white";
+    player.boxRenderable.worldX = 0;
+    player.boxRenderable.worldY = 0;
+    player.boxRenderable.w = 9;
+    player.boxRenderable.h = 16;
+    player.boxRenderable.renderLevel = 2;
+    player.boxRenderable.lineWidth = 1;
+    player.boxRenderable.color = "white";
 
     RenderComponent playerRenderComponent(&player.renderable);
+    BoxOutlineRenderComponent playerBoxOutlineComp(&player.boxRenderable);
 
     PlayerUIEventsComponent playerUIEventsComponent(&player);
 

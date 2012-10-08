@@ -10,13 +10,22 @@ public:
     float worldX, worldY;
     std::string imageName;
     std::string color;
+    int renderLevel;
 
     Renderable() {}
     Renderable(float x, float y, std::string name, std::string color)
-        : worldX(x), worldY(y), imageName(name), color(color)
+        : worldX(x), worldY(y), imageName(name), color(color),
+          renderLevel(0)
     {}
-    virtual ~Renderable() {};
 };
+
+class BoxRenderable {
+public:    
+    float worldX, worldY, w, h;
+    float lineWidth;
+    std::string color;
+    int renderLevel;
+};  
 
 struct MovementPayload : public Message::IPayload {
     std::string source;
@@ -33,6 +42,14 @@ struct CollisionPayload : public Message::IPayload {
 
     CollisionPayload(std::string source, float worldX, float worldY)
         : source(source), worldX(worldX), worldY(worldY)
+    {}
+};
+
+struct RenderPayload : public Message::IPayload {
+    int level;
+
+    RenderPayload(int level)
+        : level(level)
     {}
 };
 
