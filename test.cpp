@@ -109,6 +109,48 @@ private:
     BoxRenderable *_renderable;
 };
 
+class SelectorRenderComponent : public Component {
+public:
+    SelectorRenderComponent(BoxRenderable *renderable, float selectorMargin)
+        :_renderable(renderable), selectorMargin(selectorMargin)
+    {
+        addResponderType("render");
+    }
+
+    virtual bool respond(Message *message)
+    {
+        if(message->type == Hash::hashString("render"))
+        {
+            auto payload = std::static_pointer_cast<RenderPayload>(message->payload);
+            if(payload->level == _renderable->renderLevel)
+            {
+                auto sdlDriver = game->engine.getSDLDriver();
+                
+                auto c = Colors::Parse(_renderable->color);
+                auto x = _renderable->worldX;
+                auto y = _renderable->worldY;
+                auto w = _renderable->w;
+                auto h = _renderable->h;
+                auto lw = _renderable->lineWidth;
+                auto s = selectorMargin;
+                sdlDriver->drawLine(x-1, y-1, x+w/s, y-1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x+w-w/s, y-1, x+w+1, y-1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x-1, y-1, x-1, y+h/s, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x-1, y+h-h/s, x-1, y+h+1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x-1, y+h+1, x+w/s, y+h+1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x+w-w/s, y+h+1, x+w+1, y+h+1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x+w+1, y-1, x+w+1, y+h/s, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x+w+1, y+h-h/s, x+w+1, y+h+1, c.r, c.g, c.b, lw);
+            }
+        }
+        return false;
+    }
+    
+private:
+    BoxRenderable *_renderable;
+    float selectorMargin;
+};
+
 class PlayerUIEventsComponent : public Component {
 public:
     PlayerUIEventsComponent(Player *player) 
@@ -226,10 +268,10 @@ int main(int argc, char *argv[])
     player.boxRenderable.h = game->cellHeight;
     player.boxRenderable.renderLevel = 2;
     player.boxRenderable.lineWidth = 1;
-    player.boxRenderable.color = "blue";
+    player.boxRenderable.color = "yellow";
 
     RenderComponent playerRenderComponent(&player.renderable);
-    BoxOutlineRenderComponent playerBoxOutlineComp(&player.boxRenderable);
+    SelectorRenderComponent playerSelectorOutlineComp(&player.boxRenderable, 6);
 
     PlayerUIEventsComponent playerUIEventsComponent(&player);
 
