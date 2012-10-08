@@ -14,8 +14,11 @@ public:
     Engine engine;
     ImageNameCache imageNameCache;
 
+    unsigned int cellWidth, cellHeight;
+    std::string gameState;
+
 private:
-    Game() {}
+    Game();
     static std::unique_ptr<Game> _instance;
 };
 

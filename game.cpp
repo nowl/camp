@@ -11,3 +11,7 @@ Game::Instance()
     return _instance.get();
 }
 
+Game::Game()
+    : cellWidth(9*1.25), cellHeight(16*1.25),
+      gameState("play")
+{}

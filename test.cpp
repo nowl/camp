@@ -58,15 +58,17 @@ public:
             {
                 auto sdlDriver = game->engine.getSDLDriver();
                 GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
+
+                int r, g, b;
                 if(_renderable->color == "white")
-                    sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                         9, 16, 1, 1, 1);
+                { r=1; g=1; b=1; }
                 else if(_renderable->color == "blue")
-                    sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                         9, 16, 0, 0, 1);
+                { r=0; g=0; b=1; }
                 else if(_renderable->color == "red")
-                    sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                         9, 16, 1, 0, 0);
+                { r=1; g=0; b=0; }
+                
+                sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                     game->cellWidth, game->cellHeight, r, g, b);
             }
         }
 
@@ -142,22 +144,22 @@ public:
                 {
                     _player->canMove = true;
                     MovementPayload payload("player",
-                                            _player->renderable.worldX + 9,
+                                            _player->renderable.worldX + game->cellWidth,
                                             _player->renderable.worldY);
                     Message::send("move", payload, Message::ASYNC);
                     if(_player->canMove)
-                        _player->renderable.worldX += 9;
+                        _player->renderable.worldX += game->cellWidth;
                     break;
                 }
                 case SDLK_KP4:
                 {
                     _player->canMove = true;
                     MovementPayload payload("player",
-                                            _player->renderable.worldX - 9,
+                                            _player->renderable.worldX - game->cellWidth,
                                             _player->renderable.worldY);
                     Message::send("move", payload, Message::ASYNC);
                     if(_player->canMove)
-                        _player->renderable.worldX -= 9;
+                        _player->renderable.worldX -= game->cellWidth;
                     break;
                 }
                 case SDLK_KP8:
@@ -165,10 +167,10 @@ public:
                     _player->canMove = true;
                     MovementPayload payload("player",
                                             _player->renderable.worldX,
-                                            _player->renderable.worldY - 16);
+                                            _player->renderable.worldY - game->cellHeight);
                     Message::send("move", payload, Message::ASYNC);
                     if(_player->canMove)
-                        _player->renderable.worldY -= 16;
+                        _player->renderable.worldY -= game->cellHeight;
                     break;
                 }
                 case SDLK_KP2:
@@ -176,10 +178,10 @@ public:
                     _player->canMove = true;
                     MovementPayload payload("player",
                                             _player->renderable.worldX,
-                                            _player->renderable.worldY + 16);
+                                            _player->renderable.worldY + game->cellHeight);
                     Message::send("move", payload, Message::ASYNC);
                     if(_player->canMove)
-                        _player->renderable.worldY += 16;
+                        _player->renderable.worldY += game->cellHeight;
                     break;
                 }
                 default:
@@ -191,8 +193,8 @@ public:
                 // determine where mouse is
                 auto mouseX = p->event.motion.x;
                 auto mouseY = p->event.motion.y;
-                _player->boxRenderable.worldX = mouseX/9*9;
-                _player->boxRenderable.worldY = mouseY/16*16;
+                _player->boxRenderable.worldX = mouseX/game->cellWidth*game->cellWidth;
+                _player->boxRenderable.worldY = mouseY/game->cellHeight*game->cellHeight;
             }
         }
         else if(message->type == Hash::hashString("collision"))
@@ -222,15 +224,15 @@ int main(int argc, char *argv[])
     GlobalRenderComponent systemRenderComp;
 
     Player player;
-    player.renderable.worldX = 9*5;
-    player.renderable.worldY = 16*5;
+    player.renderable.worldX = game->cellWidth*5;
+    player.renderable.worldY = game->cellHeight*5;
     player.renderable.imageName = "player";
     player.renderable.renderLevel = 1;
     player.renderable.color = "white";
     player.boxRenderable.worldX = 0;
     player.boxRenderable.worldY = 0;
-    player.boxRenderable.w = 9;
-    player.boxRenderable.h = 16;
+    player.boxRenderable.w = game->cellWidth;
+    player.boxRenderable.h = game->cellHeight;
     player.boxRenderable.renderLevel = 2;
     player.boxRenderable.lineWidth = 1;
     player.boxRenderable.color = "white";
@@ -242,6 +244,9 @@ int main(int argc, char *argv[])
 
 
     Walls walls;
+
+    auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth;
+    auto maxCellsY = game->engine.getSDLDriver()->getScreenHeight() / game->cellHeight;
     
     for(int i=0; i<Random::intMinMax(1000, 2000); i++)
     {
@@ -256,8 +261,8 @@ int main(int argc, char *argv[])
             wallType = "water";
             color = "blue";
         }
-        walls.renderEntities.push_back(Renderable(9*Random::intMinMax(0,70),
-                                                  16*Random::intMinMax(0,40),
+        walls.renderEntities.push_back(Renderable(game->cellWidth*Random::intMinMax(0,maxCellsX-1),
+                                                  game->cellHeight*Random::intMinMax(0,maxCellsY-1),
                                                   wallType,
                                                   color));
     }
