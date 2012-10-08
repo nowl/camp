@@ -9,7 +9,8 @@ EXECSRCS = \
 	cp437.cpp \
 	images.cpp \
 	game.cpp \
-	test.cpp
+	test.cpp \
+	colors.cpp
 
 EXECOBJS = $(EXECSRCS:.cpp=.o)
 

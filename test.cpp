@@ -14,6 +14,7 @@
 #include "player.hpp"
 #include "walls.hpp"
 #include "game_components.hpp"
+#include "colors.hpp"
 
 static Game *game = Game::Instance();
 
@@ -59,16 +60,9 @@ public:
                 auto sdlDriver = game->engine.getSDLDriver();
                 GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
 
-                int r, g, b;
-                if(_renderable->color == "white")
-                { r=1; g=1; b=1; }
-                else if(_renderable->color == "blue")
-                { r=0; g=0; b=1; }
-                else if(_renderable->color == "red")
-                { r=1; g=0; b=0; }
-                
+                Colors c = Colors::Parse(_renderable->color);                
                 sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                     game->cellWidth, game->cellHeight, r, g, b);
+                                     game->cellWidth, game->cellHeight, c.r, c.g, c.b);
             }
         }
 
@@ -96,19 +90,16 @@ public:
             {
                 auto sdlDriver = game->engine.getSDLDriver();
                 
-                float r,g,b;
-                if(_renderable->color == "white")
-                { r=1; g=1; b=1; }
-                
+                auto c = Colors::Parse(_renderable->color);
                 auto x = _renderable->worldX;
                 auto y = _renderable->worldY;
                 auto w = _renderable->w;
                 auto h = _renderable->h;
                 auto lw = _renderable->lineWidth;
-                sdlDriver->drawLine(x-1, y-1, x+w+1, y-1, lw, r, g, b);
-                sdlDriver->drawLine(x-1, y-1, x-1, y+h+1, lw, r, g, b);
-                sdlDriver->drawLine(x-1, y+h+1, x+w+1, y+h+1, lw, r, g, b);
-                sdlDriver->drawLine(x+w+1, y-1, x+w+1, y+h+1, lw, r, g, b);
+                sdlDriver->drawLine(x-1, y-1, x+w+1, y-1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x-1, y-1, x-1, y+h+1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x-1, y+h+1, x+w+1, y+h+1, c.r, c.g, c.b, lw);
+                sdlDriver->drawLine(x+w+1, y-1, x+w+1, y+h+1, c.r, c.g, c.b, lw);
             }
         }
         return false;
@@ -235,7 +226,7 @@ int main(int argc, char *argv[])
     player.boxRenderable.h = game->cellHeight;
     player.boxRenderable.renderLevel = 2;
     player.boxRenderable.lineWidth = 1;
-    player.boxRenderable.color = "white";
+    player.boxRenderable.color = "blue";
 
     RenderComponent playerRenderComponent(&player.renderable);
     BoxOutlineRenderComponent playerBoxOutlineComp(&player.boxRenderable);
