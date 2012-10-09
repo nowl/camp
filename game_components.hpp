@@ -3,7 +3,13 @@
 
 #include <string>
 
+#include "component.hpp"
 #include "message.hpp"
+
+class Game;
+class Player;
+
+static const int NumRenderLevels = 3;
 
 class Renderable {
 public:    
@@ -51,6 +57,53 @@ struct RenderPayload : public Message::IPayload {
     RenderPayload(int level)
         : level(level)
     {}
+};
+
+// components
+
+class GlobalRenderComponent : public Component {
+public:
+    GlobalRenderComponent(Game *game);
+    virtual bool respond(Message *message);
+private:
+    Game *game;
+};
+
+class RenderComponent : public Component {
+public:
+    RenderComponent(Renderable *renderable, Game *game);
+    virtual bool respond(Message *message);
+private:
+    Renderable *_renderable;
+    Game *game;
+};
+
+class BoxOutlineRenderComponent : public Component {
+public:
+    BoxOutlineRenderComponent(BoxRenderable *renderable, Game *game);
+    virtual bool respond(Message *message);
+private:
+    BoxRenderable *_renderable;
+    Game *game;
+};
+
+class SelectorRenderComponent : public Component {
+public:
+    SelectorRenderComponent(BoxRenderable *renderable, float selectorMargin, Game *game);
+    virtual bool respond(Message *message);
+private:
+    BoxRenderable *_renderable;
+    float selectorMargin;
+    Game *game;
+};
+
+class PlayerUIEventsComponent : public Component {
+public:
+    PlayerUIEventsComponent(Player *player, Game *game);
+    virtual bool respond(Message *message);
+private:
+    Player *_player;
+    Game *game;
 };
 
 #endif  // __GAME_COMPONENTS_HPP__
