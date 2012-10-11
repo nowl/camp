@@ -29,7 +29,8 @@ class BoxRenderable {
 public:    
     float worldX, worldY, w, h;
     float lineWidth;
-    std::string color;
+    std::string color, flashColor;
+    unsigned long flashDuration;
     int renderLevel;
 };  
 
@@ -80,11 +81,14 @@ private:
 
 class BoxOutlineRenderComponent : public Component {
 public:
-    BoxOutlineRenderComponent(BoxRenderable *renderable, Game *game);
+    BoxOutlineRenderComponent(BoxRenderable *renderable, Game *game, bool flash=false);
     virtual bool respond(Message *message);
 private:
     BoxRenderable *_renderable;
     Game *game;
+    bool _flash;
+    int _timer;
+    bool _useFlashColor;
 };
 
 class SelectorRenderComponent : public Component {

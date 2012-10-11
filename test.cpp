@@ -41,12 +41,22 @@ int main(int argc, char *argv[])
     player.boxRenderable.renderLevel = 2;
     player.boxRenderable.lineWidth = 1;
     player.boxRenderable.color = "yellow";
+    player.selectedCellRenderable.worldX = 0;
+    player.selectedCellRenderable.worldY = 0;
+    player.selectedCellRenderable.w = game->cellWidth;
+    player.selectedCellRenderable.h = game->cellHeight;
+    player.selectedCellRenderable.renderLevel = 2;
+    player.selectedCellRenderable.lineWidth = 1;
+    player.selectedCellRenderable.color = "white";
+    player.selectedCellRenderable.flashColor = "blue";
+    player.selectedCellRenderable.flashDuration = 400;
+
 
     RenderComponent playerRenderComponent(&player.renderable, game);
     SelectorRenderComponent playerSelectorOutlineComp(&player.boxRenderable, 6, game);
 
     PlayerUIEventsComponent playerUIEventsComponent(&player, game);
-
+    BoxOutlineRenderComponent selectedCellComponent(&player.selectedCellRenderable, game, true);
 
     Walls walls;
 

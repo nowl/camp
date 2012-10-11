@@ -52,8 +52,8 @@ bool RenderComponent::respond(Message *message)
     return false;
 }
 
-BoxOutlineRenderComponent::BoxOutlineRenderComponent(BoxRenderable *renderable, Game *game)
-    : _renderable(renderable), game(game)
+BoxOutlineRenderComponent::BoxOutlineRenderComponent(BoxRenderable *renderable, Game *game, bool flash)
+    : _renderable(renderable), game(game), _flash(flash), _timer(0), _useFlashColor(false)
 {
     addResponderType("render");
 }
@@ -65,9 +65,20 @@ bool BoxOutlineRenderComponent::respond(Message *message)
         auto payload = std::static_pointer_cast<RenderPayload>(message->payload);
         if(payload->level == _renderable->renderLevel)
         {
+            if(game->engine.getTick() > _timer)
+            {
+                _timer += _renderable->flashDuration;
+                _useFlashColor = !_useFlashColor;
+            }
+            
             auto sdlDriver = game->engine.getSDLDriver();
             
-            auto c = Colors::Parse(_renderable->color);
+            Colors c;
+            if(_useFlashColor)
+                c = Colors::Parse(_renderable->flashColor);
+            else
+                c = Colors::Parse(_renderable->color);
+
             auto x = _renderable->worldX;
             auto y = _renderable->worldY;
             auto w = _renderable->w;
@@ -192,6 +203,14 @@ bool PlayerUIEventsComponent::respond(Message *message)
             auto mouseY = p->event.motion.y;
             _player->boxRenderable.worldX = mouseX/game->cellWidth*game->cellWidth;
             _player->boxRenderable.worldY = mouseY/game->cellHeight*game->cellHeight;
+        }
+        else if(p->event.type == SDL_MOUSEBUTTONDOWN)
+        {
+            // determine where mouse is
+            auto mouseX = p->event.button.x;
+            auto mouseY = p->event.button.y;
+            _player->selectedCellRenderable.worldX = mouseX/game->cellWidth*game->cellWidth;
+            _player->selectedCellRenderable.worldY = mouseY/game->cellHeight*game->cellHeight;
         }
     }
     else if(message->type == Hash::hashString("collision"))
