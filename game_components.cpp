@@ -6,6 +6,7 @@
 #include "game.hpp"
 #include "message.hpp"
 #include "colors.hpp"
+#include "text.hpp"
 
 GlobalRenderComponent::GlobalRenderComponent(Game *game)
     : game(game)
@@ -46,6 +47,35 @@ bool RenderComponent::respond(Message *message)
             Colors c = Colors::Parse(_renderable->color);                
             sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
                                  game->cellWidth, game->cellHeight, c.r, c.g, c.b);
+        }
+    }
+    
+    return false;
+}
+
+TextRenderComponent::TextRenderComponent(Text *text, Game *game)
+    : _text(text), game(game)
+{
+    addResponderType("render");
+}
+
+bool TextRenderComponent::respond(Message *message)
+{
+    if(message->type == Hash::hashString("render"))
+    {
+        auto payload = std::static_pointer_cast<RenderPayload>(message->payload);
+        if(payload->level == _text->renderLevel)
+        {            
+            auto sdlDriver = game->engine.getSDLDriver();
+            /*
+            GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
+            */
+            
+            /*
+            Colors c = Colors::Parse(_renderable->color);                
+            sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
+                                 game->cellWidth, game->cellHeight, c.r, c.g, c.b);
+            */
         }
     }
     

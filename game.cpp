@@ -13,5 +13,6 @@ Game::Instance()
 
 Game::Game()
     : cellWidth(9*1.25), cellHeight(16*1.25),
+      hudCellWidth(25),
       gameState("play")
 {}

@@ -8,6 +8,7 @@
 
 class Game;
 class Player;
+class Text;
 
 static const int NumRenderLevels = 3;
 
@@ -76,6 +77,15 @@ public:
     virtual bool respond(Message *message);
 private:
     Renderable *_renderable;
+    Game *game;
+};
+
+class TextRenderComponent : public Component {
+public:
+    TextRenderComponent(Text *text, Game *game);
+    virtual bool respond(Message *message);
+private:
+    Text *_text;
     Game *game;
 };
 

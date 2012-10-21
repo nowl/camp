@@ -15,6 +15,7 @@ public:
     ImageNameCache imageNameCache;
 
     unsigned int cellWidth, cellHeight;
+    unsigned int hudCellWidth;
     std::string gameState;
 
 private:

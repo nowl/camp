@@ -11,7 +11,8 @@ EXECSRCS = \
 	game.cpp \
 	test.cpp \
 	colors.cpp \
-	game_components.cpp
+	game_components.cpp \
+	text.cpp
 
 EXECOBJS = $(EXECSRCS:.cpp=.o)
 

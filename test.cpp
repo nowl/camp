@@ -13,6 +13,7 @@
 #include "walls.hpp"
 #include "game_components.hpp"
 #include "game.hpp"
+#include "text.hpp"
 
 static Game *game = Game::Instance();
 
@@ -51,6 +52,9 @@ int main(int argc, char *argv[])
     player.selectedCellRenderable.flashColor = "blue";
     player.selectedCellRenderable.flashDuration = 400;
 
+    // text test
+    Text text("testing", 25, 2);
+    TextRenderComponent textRender(&text, game);
 
     RenderComponent playerRenderComponent(&player.renderable, game);
     SelectorRenderComponent playerSelectorOutlineComp(&player.boxRenderable, 6, game);
@@ -60,7 +64,7 @@ int main(int argc, char *argv[])
 
     Walls walls;
 
-    auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth;
+    auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth - game->hudCellWidth;
     auto maxCellsY = game->engine.getSDLDriver()->getScreenHeight() / game->cellHeight;
     
     for(int i=0; i<Random::intMinMax(1000, 2000); i++)
