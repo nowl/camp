@@ -67,15 +67,23 @@ bool TextRenderComponent::respond(Message *message)
         if(payload->level == _text->renderLevel)
         {            
             auto sdlDriver = game->engine.getSDLDriver();
-            /*
-            GLuint texture = game->engine.getImageLoader()->get(game->imageNameCache.get(_renderable->imageName));
-            */
-            
-            /*
-            Colors c = Colors::Parse(_renderable->color);                
-            sdlDriver->drawImage(texture, _renderable->worldX, _renderable->worldY,
-                                 game->cellWidth, game->cellHeight, c.r, c.g, c.b);
-            */
+            Colors c = Colors::Parse(_text->color);
+
+            char imageName[2];
+            for(int row=0; row<_text->numRows(); row++)
+            {
+                auto text = _text->getText(row);
+                for(int i=0; i<text.length(); i++)
+                {
+                    sprintf(imageName, "%2x", text[i]);
+                    GLuint texture = game->engine.getImageLoader()->get(imageName);
+                    sdlDriver->drawImage(texture,
+                                         _text->worldX + i * game->cellWidth,
+                                         _text->worldY + row * game->cellHeight,
+                                         game->cellWidth, game->cellHeight, c.r, c.g, c.b);
+                    
+                }
+            }
         }
     }
     

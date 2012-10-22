@@ -53,7 +53,10 @@ int main(int argc, char *argv[])
     player.selectedCellRenderable.flashDuration = 400;
 
     // text test
-    Text text("testing", 25, 2);
+    Text text("this is a test of using a given fitWidth to break up text... testing, testing testing!", 20);
+    text.renderLevel = 2;
+    text.worldX = 10 * game->cellWidth;
+    text.worldY = 10 * game->cellHeight;
     TextRenderComponent textRender(&text, game);
 
     RenderComponent playerRenderComponent(&player.renderable, game);
