@@ -52,12 +52,17 @@ int main(int argc, char *argv[])
     player.selectedCellRenderable.flashColor = "blue";
     player.selectedCellRenderable.flashDuration = 400;
 
+    auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth - game->hudCellWidth;
+    auto maxCellsY = game->engine.getSDLDriver()->getScreenHeight() / game->cellHeight;
+
     // text test
-    Text text("this is a test of using a given fitWidth to break up text... testing, testing testing!", 20);
-    text.renderLevel = 2;
-    text.worldX = 10 * game->cellWidth;
-    text.worldY = 10 * game->cellHeight;
-    TextRenderComponent textRender(&text, game);
+    
+    auto text = std::unique_ptr<Text>(new Text("Welcome to CAMP.", game->hudCellWidth-2));
+    text->renderLevel = 2;
+    text->worldX = (maxCellsX + 1) * game->cellWidth;
+    text->worldY = 1 * game->cellHeight;
+    text->color = "#ff4fff";
+    TextRenderComponent textRender(text.get(), game);
 
     RenderComponent playerRenderComponent(&player.renderable, game);
     SelectorRenderComponent playerSelectorOutlineComp(&player.boxRenderable, 6, game);
@@ -66,9 +71,6 @@ int main(int argc, char *argv[])
     BoxOutlineRenderComponent selectedCellComponent(&player.selectedCellRenderable, game, true);
 
     Walls walls;
-
-    auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth - game->hudCellWidth;
-    auto maxCellsY = game->engine.getSDLDriver()->getScreenHeight() / game->cellHeight;
     
     for(int i=0; i<Random::intMinMax(1000, 2000); i++)
     {

@@ -69,13 +69,13 @@ bool TextRenderComponent::respond(Message *message)
             auto sdlDriver = game->engine.getSDLDriver();
             Colors c = Colors::Parse(_text->color);
 
-            char imageName[2];
+            char imageName[3];
             for(int row=0; row<_text->numRows(); row++)
             {
                 auto text = _text->getText(row);
                 for(int i=0; i<text.length(); i++)
                 {
-                    sprintf(imageName, "%2x", text[i]);
+                    snprintf(imageName, 3, "%2x", text[i]);
                     GLuint texture = game->engine.getImageLoader()->get(imageName);
                     sdlDriver->drawImage(texture,
                                          _text->worldX + i * game->cellWidth,
