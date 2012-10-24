@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
     player.selectedCellRenderable.flashColor = "blue";
     player.selectedCellRenderable.flashDuration = 400;
 
+    auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth - game->hudCellWidth;
+    auto maxCellsY = game->engine.getSDLDriver()->getScreenHeight() / game->cellHeight;
+
     // text test
     Text text("this is a test of using a given fitWidth to break up text... testing, testing testing!");
     text.fitWidth = 20;
@@ -68,9 +71,6 @@ int main(int argc, char *argv[])
     BoxOutlineRenderComponent selectedCellComponent(&player.selectedCellRenderable, game, true);
 
     Walls walls;
-
-    auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth - game->hudCellWidth;
-    auto maxCellsY = game->engine.getSDLDriver()->getScreenHeight() / game->cellHeight;
     
     //for(int i=0; i<Random::intMinMax(1000, 2000); i++)
     for(int i=0; i<6000; i++)
