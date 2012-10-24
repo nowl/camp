@@ -18,13 +18,9 @@ Colors::Parse(std::string color)
         c.r = (float)r/255;
         c.g = (float)g/255;
         c.b = (float)b/255;
-<<<<<<< HEAD
     }
     else
     {
-=======
-    } else {
->>>>>>> 25d977dd65963e80d7b10d654a0d4a934d416043
         if(color == "white")
         { c.r=1; c.g=1; c.b=1; }
         else if(color == "blue")
