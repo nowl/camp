@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     player.renderable.worldY = game->cellHeight*5;
     player.renderable.imageName = "player";
     player.renderable.renderLevel = 1;
-    player.renderable.color = "white";
+    player.renderable.color = Colors::Parse("white");
     player.boxRenderable.worldX = 0;
     player.boxRenderable.worldY = 0;
     player.boxRenderable.w = game->cellWidth;
@@ -53,8 +53,10 @@ int main(int argc, char *argv[])
     player.selectedCellRenderable.flashDuration = 400;
 
     // text test
-    Text text("this is a test of using a given fitWidth to break up text... testing, testing testing!", 20);
+    Text text("this is a test of using a given fitWidth to break up text... testing, testing testing!");
+    text.fitWidth = 20;
     text.renderLevel = 2;
+    text.color = Colors(1, 1, 0);
     text.worldX = 10 * game->cellWidth;
     text.worldY = 10 * game->cellHeight;
     TextRenderComponent textRender(&text, game);
@@ -70,19 +72,24 @@ int main(int argc, char *argv[])
     auto maxCellsX = game->engine.getSDLDriver()->getScreenWidth() / game->cellWidth - game->hudCellWidth;
     auto maxCellsY = game->engine.getSDLDriver()->getScreenHeight() / game->cellHeight;
     
-    for(int i=0; i<Random::intMinMax(1000, 2000); i++)
+    //for(int i=0; i<Random::intMinMax(1000, 2000); i++)
+    for(int i=0; i<6000; i++)
     {
-        std::string wallType, color;
-        if(Random::intMinMax(0,1) == 0)
+        std::string wallType;
+        Colors color;
+        if(Random::intMinMax(0,10) == 0)
         {
             wallType = "solid";
-            color = "red";
+            color.r = Random::f();
+            color.g = Random::f();
+            color.b = Random::f();            
         }
         else
         {
             wallType = "water";
-            color = "blue";
+            color = Colors::Parse("blue");
         }
+        
         walls.renderEntities.push_back(Renderable(game->cellWidth*Random::intMinMax(0,maxCellsX-1),
                                                   game->cellHeight*Random::intMinMax(0,maxCellsY-1),
                                                   wallType,

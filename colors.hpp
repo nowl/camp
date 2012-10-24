@@ -8,6 +8,9 @@ struct Colors
 public:
     float r, g, b;
 
+    Colors();
+    Colors(float r, float g, float b);
+
     static Colors Parse(std::string color);
 };
 

@@ -5,6 +5,7 @@
 
 #include "component.hpp"
 #include "message.hpp"
+#include "colors.hpp"
 
 class Game;
 class Player;
@@ -16,11 +17,11 @@ class Renderable {
 public:    
     float worldX, worldY;
     std::string imageName;
-    std::string color;
+    Colors color;
     int renderLevel;
 
     Renderable() {}
-    Renderable(float x, float y, std::string name, std::string color)
+    Renderable(float x, float y, std::string name, Colors color)
         : worldX(x), worldY(y), imageName(name), color(color),
           renderLevel(0)
     {}
