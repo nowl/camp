@@ -1,5 +1,6 @@
 #include <SDL.h>
 
+#include <iostream>
 #include <cstdio>
 
 #include "message.hpp"
@@ -14,13 +15,14 @@
 #include "game_components.hpp"
 #include "game.hpp"
 #include "text.hpp"
+#include "dungeon.hpp"
 
 static Game *game = Game::Instance();
 
 int main(int argc, char *argv[])
 {
     game->engine.getSDLDriver()->setVideoMode(1280, 1024);
-
+    
     load_cp437();
     
     game->imageNameCache.cache("player", "40");
@@ -99,6 +101,10 @@ int main(int argc, char *argv[])
     }
 
     game->engine.run();
+
+    Dungeon dng(6, 5, 10, 10, 10, 10, 6, 6, 1);
+
+    std::cout << dng << std::endl;
 
     return 0;
 }

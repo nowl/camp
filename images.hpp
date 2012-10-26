@@ -6,8 +6,8 @@
 
 class ImageNameCache {
 public:
-    void cache(std::string name, std::string image_name);
-    std::string get(std::string name);
+    void cache(const std::string& name, const std::string& image_name);
+    const std::string& get(const std::string& name) const;
     
 private:
     std::unordered_map<std::string, std::string> _cache;

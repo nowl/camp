@@ -1,7 +1,7 @@
 #include "colors.hpp"
 
 Colors
-Colors::Parse(std::string color)
+Colors::Parse(const std::string& color)
 {
     Colors c;
     

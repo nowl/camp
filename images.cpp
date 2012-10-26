@@ -1,13 +1,14 @@
 #include "images.hpp"
 
 void
-ImageNameCache::cache(std::string name, std::string image_name)
+ImageNameCache::cache(const std::string& name,
+                      const std::string& image_name)
 {
     _cache[name] = image_name;
 }
 
-std::string
-ImageNameCache::get(std::string name)
+const std::string&
+ImageNameCache::get(const std::string& name) const
 {
-    return _cache[name];
+    return _cache.find(name)->second;
 }
