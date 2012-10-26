@@ -2,10 +2,16 @@
 
 #include "text.hpp"
 
-Text::Text(std::string text, unsigned int fitWidth)
-    : renderLevel(0), worldX(0), worldY(0), color("blue")
+Text::Text(std::string text)
+    : fitWidth(20), renderLevel(0), worldX(0), worldY(0), color(Colors::Parse("white"))
 {
-    splitText(text, fitWidth);
+    setText(text);
+}
+
+void Text::setText(std::string text)
+{
+    _text.clear();
+    splitText(text);
 }
 
 int Text::numRows() const
@@ -18,7 +24,7 @@ std::string Text::getText(int row) const
     return _text[row];
 }
 
-void Text::splitText(std::string text, unsigned int fitWidth)
+void Text::splitText(std::string text)
 {
     unsigned int lastSpace = 0;
     int llastSpace = -1;

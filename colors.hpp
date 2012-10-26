@@ -8,7 +8,10 @@ struct Colors
 public:
     float r, g, b;
 
-    static Colors Parse(const std::string& color);
+    Colors();
+    Colors(float r, float g, float b);
+
+    static Colors Parse(std::string color);
 };
 
 #endif  // __COLORS_HPP__
