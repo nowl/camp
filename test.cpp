@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
     game->engine.run();
 
-    Dungeon dng(6, 5, 10, 10, 10, 10, 6, 6, 1);
+    Dungeon dng(6, 3, 10, 10, 10, 10, 6, 6, 1, 3, 4, 15, .5);
 
     std::cout << dng << std::endl;
 
