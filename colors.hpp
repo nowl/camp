@@ -11,7 +11,7 @@ public:
     Colors();
     Colors(float r, float g, float b);
 
-    static Colors Parse(std::string color);
+    static Colors Parse(const std::string &color);
 };
 
 #endif  // __COLORS_HPP__
