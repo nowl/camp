@@ -16,6 +16,7 @@
 #include "game.hpp"
 #include "text.hpp"
 #include "dungeon.hpp"
+#include "dungeon_view.hpp"
 
 static Game *game = Game::Instance();
 
@@ -108,6 +109,9 @@ int main(int argc, char *argv[])
     game->engine.run();
 
     Dungeon dng(6, 3, 10, 10, 10, 10, 6, 6, 1, 3, 4, 15, .5);
+
+    DungeonView dng_view(dng);
+    dng_view.setViewingRect(DungeonView::Rect(0, 0, 10, 10));
 
     std::cout << dng << std::endl;
 
