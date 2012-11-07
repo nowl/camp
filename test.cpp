@@ -20,8 +20,61 @@
 
 static Game *game = Game::Instance();
 
+struct Spot {
+    Spot() {}
+    Spot(int x, int y) : x(x), y(y) {}
+    
+    int x, y;
+
+    bool operator==(const Spot& other) const
+    {
+        return x == other.x && y == other.y;
+    }
+};
+
+std::ostream& operator<<(std::ostream& out, Spot &elem)
+{
+    out << "(" << elem.x << "," << elem.y << ")";
+    return out;
+}
+
+class Test1 {
+public:
+    float getCost(Spot a) const
+    {
+        if(a == Spot(4,0) ||
+           a == Spot(4,1) ||
+           a == Spot(4,-1) ||
+           a == Spot(5,-1) ||
+           a == Spot(5,1))
+            return 1000;
+        return 1;
+    }
+
+    float getHeuristicCost(Spot a, Spot b) const
+    {
+        return abs(a.x - b.x) + abs(a.y - b.y);
+    }
+
+    void getAdjacencies(Spot a, std::vector<Spot>& adjs) const
+    {
+        adjs.push_back(Spot(a.x-1, a.y));
+        adjs.push_back(Spot(a.x+1, a.y));
+        adjs.push_back(Spot(a.x, a.y-1));
+        adjs.push_back(Spot(a.x, a.y+1));
+    }
+};
+
 int main(int argc, char *argv[])
 {
+    Test1 test;
+    auto results = best_path<Test1, Spot>(test, Spot(0,0), Spot(5,0));
+    
+    auto i1 = results.begin();
+    for(; i1 != results.end(); ++i1)
+        std::cout << *i1 << ", ";
+    return 0;
+
     game->engine.getSDLDriver()->setVideoMode(1280, 1024);
     
     load_cp437();
@@ -108,7 +161,7 @@ int main(int argc, char *argv[])
 
     game->engine.run();
 
-    Dungeon dng(6, 3, 10, 10, 10, 10, 6, 6, 1, 3, 4, 15, .5);
+    Dungeon dng(20, 20, 10, 10, 7, 7, 3, 3, 1, 3, 3, 10, .3);
 
     DungeonView dng_view(dng);
     dng_view.setViewingRect(DungeonView::Rect(0, 0, 10, 10));

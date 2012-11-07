@@ -5,6 +5,8 @@
 #include <vector>
 #include <ostream>
 
+#include "astar.hpp"
+
 struct Room
 {
     int dungeonPosX, dungeonPosY, posX, posY, width, height;
@@ -23,13 +25,16 @@ public:
 
     inline void setCell(unsigned int x, unsigned int y, int val)
     {
-        _dungeon[y*_dungeonWidth + x] = val;
+        _dungeon[y*getWidth() + x] = val;
     }
 
     inline int getCell(unsigned int x, unsigned int y) const
     {
-        return _dungeon[y*_dungeonWidth + x];
+        return _dungeon[y*getWidth() + x];
     }
+
+    int getWidth() const { return _numRoomsX * _roomWidth; }
+    int getHeight() const { return _numRoomsY * _roomHeight; }
 
 private:
     unsigned int _numRoomsX, _numRoomsY,
@@ -40,12 +45,12 @@ private:
         _minHallLen, _maxHallLen;    
     float _roomProb;
 
-    int _dungeonWidth, _dungeonHeight;
     std::unique_ptr<int[]> _dungeon;
     std::vector<Room> _rooms;
     friend std::ostream& operator<<(std::ostream& out, Dungeon &dng);
 
     void makeRoom(unsigned int x, unsigned int y);
+    void makeHallInit(int sx, int sy);
     void makeHall(int sx, int sy, bool out_of_room, int incoming_dir);
     void makeHalls();
 };

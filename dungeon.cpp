@@ -8,9 +8,9 @@ using namespace std;
 
 std::ostream& operator<<(std::ostream& out, Dungeon &dng)
 {
-    for(int y=0; y<dng._dungeonHeight; y++)
+    for(int y=0; y<dng.getHeight(); y++)
     {
-        for(int x=0; x<dng._dungeonWidth; x++)
+        for(int x=0; x<dng.getWidth(); x++)
         {
             out << dng.getCell(x, y) << "";
         }
@@ -31,12 +31,10 @@ Dungeon::Dungeon(unsigned int numRoomsX, unsigned int numRoomsY,
     _minDoors(minDoors), _maxDoors(maxDoors), _minHallLen(minHallLen), _maxHallLen(maxHallLen),
     _roomProb(roomProb), _dungeon(nullptr)
 {
-    _dungeonWidth = _numRoomsX * _roomWidth;
-    _dungeonHeight = _numRoomsY * _roomHeight;
-    _dungeon = std::unique_ptr<int[]>(new int[_dungeonWidth * _dungeonHeight]);
+    _dungeon = std::unique_ptr<int[]>(new int[getWidth() * getHeight()]);
 
-    for(int y=0; y<_dungeonHeight; y++)
-        for(int x=0; x<_dungeonWidth; x++)
+    for(int y=0; y<getHeight(); y++)
+        for(int x=0; x<getWidth(); x++)
             setCell(x, y, 0);
 
     // make rooms
@@ -77,6 +75,11 @@ void Dungeon::makeRoom(unsigned int x, unsigned int y)
     
 }
 
+void Dungeon::makeHallInit(int sx, int sy)
+{
+    makeHall(sx, sy, false, Random::intMinMax(0, 3));
+}
+
 void Dungeon::makeHall(int sx, int sy, bool out_of_room, int incoming_dir)
 {
     // length
@@ -87,41 +90,56 @@ void Dungeon::makeHall(int sx, int sy, bool out_of_room, int incoming_dir)
         NORTH = 0, EAST, SOUTH, WEST
     };
 
-    int dir = Random::intMinMax(0, 3);
+    int outgoing_dir = Random::intMinMax(0, 1);
 
-    // can't return in the incoming direction
-    int opposite_dir = (dir + 2) % 4;
-    if(incoming_dir == opposite_dir)
-        dir = (dir + 1) % 4;
+    // choose a direction perpendicular to the incoming_dir
+    if(outgoing_dir == 0)
+        outgoing_dir = (incoming_dir - 1) % 4;
+    else
+        outgoing_dir = (incoming_dir + 1) % 4;
 
-    int newY = 0, newX = 0;
+    int newY = sy, newX = sx;
     for(int i=1; i<=hallLen; i++)
     {
-        switch(dir)
+        switch(outgoing_dir)
         {
         case NORTH:
-            newX = sx;
-            newY = sy - i;
+            newY--;
             if(newY < 0)
+            {
+                outgoing_dir = SOUTH;
+                newY = 0;
                 return;
+            }
             break;
         case EAST:
-            newX = sx + i;
-            newY = sy;
-            if(newX >= _dungeonWidth)
-                return;
+            newX++;
+            if(newX >= getWidth())
+            {
+                // reverse direction
+                outgoing_dir = WEST;
+                newX = getWidth() - 1;
+                //return;
+            }
             break;
         case SOUTH:
-            newX = sx;
-            newY = sy + i;
-            if(newY >= _dungeonHeight)
-                return;
+            newY++;
+            if(newY >= getHeight())
+            {
+                // reverse direction
+                outgoing_dir = NORTH;
+                newY = getHeight() - 1;
+                //return;
+            }
             break;
         case WEST:
-            newX = sx - i;
-            newY = sy;
+            newX--;
             if(newX < 0)
-                return;
+            {
+                outgoing_dir = EAST;
+                newX = 0;
+                //return;
+            }
             break;
         }
 
@@ -134,7 +152,7 @@ void Dungeon::makeHall(int sx, int sy, bool out_of_room, int incoming_dir)
         setCell(newX, newY, 2);
     }
     
-    makeHall(newX, newY, out_of_room, dir);
+    makeHall(newX, newY, out_of_room, outgoing_dir);
 }
 
 void Dungeon::makeHalls()
@@ -150,7 +168,7 @@ void Dungeon::makeHalls()
             tmp = room.dungeonPosY * _roomHeight + room.posY;
             int startY = Random::intMinMax(tmp, tmp + room.height - 1);
             
-            makeHall(startX, startY, false, -1);
+            makeHallInit(startX, startY);
         }
     }
 }
